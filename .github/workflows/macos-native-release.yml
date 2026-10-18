@@ -173,6 +173,10 @@ jobs:
                   accept: application/json
               expect:
                 status: 200
+                body:
+                  - path: "/status"
+                    operator: "contains"
+                    value: "ok"
           YAML
 
           echo "Generated smoke flow:"

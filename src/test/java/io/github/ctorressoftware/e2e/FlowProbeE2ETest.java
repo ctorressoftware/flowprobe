@@ -22,6 +22,7 @@ import io.github.ctorressoftware.application.usecase.flowexecution.validation.Bo
 import io.github.ctorressoftware.application.usecase.flowexecution.validation.DefaultResponseValidator;
 import io.github.ctorressoftware.application.usecase.flowexecution.validation.ResponseValidator;
 import io.github.ctorressoftware.application.usecase.flowexecution.validation.StatusValidator;
+import io.github.ctorressoftware.application.usecase.flowexecution.validation.evaluator.ContainsExpectationEvaluator;
 import io.github.ctorressoftware.application.usecase.flowexecution.validation.evaluator.EqualsExpectationEvaluator;
 import io.github.ctorressoftware.application.usecase.flowexecution.validation.evaluator.ExpectationEvaluatorRegistry;
 import io.github.ctorressoftware.application.usecase.flowexecution.validation.evaluator.NotEqualsExpectationEvaluator;
@@ -65,64 +66,50 @@ class FlowProbeE2ETest {
 
         objectMapper = new ObjectMapper();
 
-        JsonProcessor jsonProcessor =
-                new JacksonJsonProcessor(objectMapper);
-
-        ExpectationEvaluatorRegistry registry =
-                new ExpectationEvaluatorRegistry(
-                        List.of(
-                                new EqualsExpectationEvaluator(),
-                                new NotEqualsExpectationEvaluator()
-                        )
-                );
-
-        ResponseValidator responseValidator =
-                new DefaultResponseValidator(
-                        new StatusValidator(registry),
-                        new BodyValidator(jsonProcessor, registry)
-                );
-
-        RequestMapper requestMapper =
-                new RequestMapper(
-                        jsonProcessor,
-                        Duration.ofSeconds(5)
-                );
+        JsonProcessor jsonProcessor = new JacksonJsonProcessor(objectMapper);
+        ResponseValidator responseValidator = getResponseValidator(jsonProcessor);
+        RequestMapper requestMapper = new RequestMapper(
+                jsonProcessor,
+                Duration.ofSeconds(5)
+        );
 
         HttpClient httpClient = HttpClient.newBuilder()
                 .connectTimeout(Duration.ofSeconds(5))
                 .build();
 
-        ServiceCaller serviceCaller =
-                new RestServiceCaller(
-                        httpClient,
-                        requestMapper
-                );
+        ServiceCaller serviceCaller = new RestServiceCaller(
+                httpClient,
+                requestMapper
+        );
 
-        ContextManager contextManager =
-                new ContextManager(
-                        new Context(),
-                        jsonProcessor
-                );
+        ContextManager contextManager = new ContextManager(
+                new Context(),
+                jsonProcessor
+        );
 
-        Executor executor =
-                new FlowExecutor(
-                        contextManager,
-                        serviceCaller,
-                        new PlaceholderResolver(),
-                        responseValidator
-                );
+        Executor executor = new FlowExecutor(
+                contextManager,
+                serviceCaller,
+                new PlaceholderResolver(),
+                responseValidator
+        );
 
-        readFileUseCase =
-                new ReadFileHandler(
-                        new YamlReader()
-                );
+        readFileUseCase = new ReadFileHandler(new YamlReader());
+        executeFlowUseCase = new ExecuteFlowHandler(executor);
+        server = HttpServer.create(new InetSocketAddress(0), 0);
+    }
 
-        executeFlowUseCase =
-                new ExecuteFlowHandler(executor);
+    private static ResponseValidator getResponseValidator(JsonProcessor jsonProcessor) {
 
-        server = HttpServer.create(
-                new InetSocketAddress(0),
-                0
+        ExpectationEvaluatorRegistry registry = new ExpectationEvaluatorRegistry(List.of(
+                new EqualsExpectationEvaluator(),
+                new NotEqualsExpectationEvaluator(),
+                new ContainsExpectationEvaluator()
+        ));
+
+        return new DefaultResponseValidator(
+                new StatusValidator(registry),
+                new BodyValidator(jsonProcessor, registry)
         );
     }
 
@@ -134,17 +121,11 @@ class FlowProbeE2ETest {
     }
 
     @Test
-    void shouldExecuteCompleteFlowPreservingExportedTypes()
-            throws Exception {
+    void shouldExecuteCompleteFlowPreservingExportedTypes() throws Exception {
 
-        AtomicReference<String> receivedMethod =
-                new AtomicReference<>();
-
-        AtomicReference<String> receivedHeader =
-                new AtomicReference<>();
-
-        AtomicReference<String> receivedBody =
-                new AtomicReference<>();
+        AtomicReference<String> receivedMethod = new AtomicReference<>();
+        AtomicReference<String> receivedHeader = new AtomicReference<>();
+        AtomicReference<String> receivedBody = new AtomicReference<>();
 
         server.createContext(
                 "/session",
@@ -164,21 +145,10 @@ class FlowProbeE2ETest {
                 "/session/25",
                 exchange -> {
 
-                    receivedMethod.set(
-                            exchange.getRequestMethod()
-                    );
-
-                    receivedHeader.set(
-                            exchange.getRequestHeaders()
-                                    .getFirst("X-Enabled")
-                    );
-
-                    receivedBody.set(
-                            new String(
-                                    exchange.getRequestBody()
-                                            .readAllBytes(),
-                                    StandardCharsets.UTF_8
-                            )
+                    receivedMethod.set(exchange.getRequestMethod());
+                    receivedHeader.set(exchange.getRequestHeaders().getFirst("X-Enabled"));
+                    receivedBody.set(new String(
+                            exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8)
                     );
 
                     respond(
@@ -186,6 +156,7 @@ class FlowProbeE2ETest {
                             200,
                             """
                             {
+                              "fullname": "John Doe",
                               "accepted": true,
                               "id": 25
                             }
@@ -242,63 +213,31 @@ class FlowProbeE2ETest {
                         - path: "/id"
                           operator: "equals"
                           value: 25
+                        - path: "/fullname"
+                          operator: "contains"
+                          value: "John"
                 """.formatted(port, port);
 
         FlowExecutionSummary summary = execute(yaml);
 
-        Assertions.assertTrue(
-                summary.successfulExecution()
-        );
+        Assertions.assertTrue(summary.successfulExecution());
+        Assertions.assertEquals(2, summary.stepsResults().size());
+        Assertions.assertEquals("POST", receivedMethod.get());
+        Assertions.assertEquals("true", receivedHeader.get());
 
-        Assertions.assertEquals(
-                2,
-                summary.stepsResults().size()
-        );
+        JsonNode body = objectMapper.readTree(receivedBody.get());
 
-        Assertions.assertEquals(
-                "POST",
-                receivedMethod.get()
-        );
-
-        Assertions.assertEquals(
-                "true",
-                receivedHeader.get()
-        );
-
-        JsonNode body =
-                objectMapper.readTree(
-                        receivedBody.get()
-                );
-
-        Assertions.assertTrue(
-                body.get("id").isInt()
-        );
-
-        Assertions.assertEquals(
-                25,
-                body.get("id").intValue()
-        );
-
-        Assertions.assertTrue(
-                body.get("enabled").isBoolean()
-        );
-
-        Assertions.assertTrue(
-                body.get("enabled").booleanValue()
-        );
-
-        Assertions.assertEquals(
-                "session-25",
-                body.get("message").textValue()
-        );
+        Assertions.assertTrue(body.get("id").isInt());
+        Assertions.assertEquals(25, body.get("id").intValue());
+        Assertions.assertTrue(body.get("enabled").isBoolean());
+        Assertions.assertTrue(body.get("enabled").booleanValue());
+        Assertions.assertEquals("session-25", body.get("message").textValue());
     }
 
     @Test
-    void shouldStopFlowAfterFailedStep()
-            throws Exception {
+    void shouldStopFlowAfterFailedStep() throws Exception {
 
-        AtomicInteger secondEndpointCalls =
-                new AtomicInteger();
+        AtomicInteger secondEndpointCalls = new AtomicInteger();
 
         server.createContext(
                 "/failure",
@@ -359,37 +298,22 @@ class FlowProbeE2ETest {
 
         FlowExecutionSummary summary = execute(yaml);
 
-        Assertions.assertFalse(
-                summary.successfulExecution()
-        );
-
-        Assertions.assertEquals(
-                1,
-                summary.stepsResults().size()
-        );
-
+        Assertions.assertFalse(summary.successfulExecution());
+        Assertions.assertEquals(1, summary.stepsResults().size());
         Assertions.assertFalse(
                 summary.stepsResults()
                         .getFirst()
                         .successful()
         );
 
-        Assertions.assertEquals(
-                0,
-                secondEndpointCalls.get()
-        );
+        Assertions.assertEquals(0, secondEndpointCalls.get());
     }
 
-    private FlowExecutionSummary execute(String yaml)
-            throws IOException {
+    private FlowExecutionSummary execute(String yaml) throws IOException {
 
         Path file = tempDir.resolve("flow.yaml");
 
-        Files.writeString(
-                file,
-                yaml,
-                StandardCharsets.UTF_8
-        );
+        Files.writeString(file, yaml, StandardCharsets.UTF_8);
 
         ReadFileResult readResult =
                 readFileUseCase.read(
@@ -416,25 +340,11 @@ class FlowProbeE2ETest {
             String body
     ) throws IOException {
 
-        byte[] bytes =
-                body.getBytes(
-                        StandardCharsets.UTF_8
-                );
+        byte[] bytes = body.getBytes(StandardCharsets.UTF_8);
+        exchange.getResponseHeaders().set("Content-Type", "application/json");
+        exchange.sendResponseHeaders(status, bytes.length);
 
-        exchange.getResponseHeaders()
-                .set(
-                        "Content-Type",
-                        "application/json"
-                );
-
-        exchange.sendResponseHeaders(
-                status,
-                bytes.length
-        );
-
-        try (var output =
-                     exchange.getResponseBody()) {
-
+        try (var output = exchange.getResponseBody()) {
             output.write(bytes);
         }
     }
