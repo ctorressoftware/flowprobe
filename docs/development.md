@@ -58,9 +58,11 @@ Run the operating-system keystore integration test separately:
 ./gradlew osKeystoreTest
 ```
 
+This test requires an environment with a supported operating-system credential store.
+
 ## Full JVM verification
 
-Before a release or pull request:
+For full JVM verification:
 
 ```bash
 ./gradlew clean check
@@ -90,6 +92,8 @@ build/reports/jacoco
 ```
 
 ## Native build
+
+Build the native executable:
 
 ```bash
 ./gradlew nativeCompile
@@ -150,6 +154,10 @@ git diff -- src/main/resources/META-INF/native-image
 
 Review every metadata change before committing it.
 
+Changes involving reflection, serialization, proxies, JNI, or native integrations should be validated through representative native execution.
+
+The tracing agent does not need to run after every code change. Use it when new or modified behavior requires additional reachability metadata.
+
 ## Versioning
 
 The project version is declared in:
@@ -158,13 +166,37 @@ The project version is declared in:
 build.gradle.kts
 ```
 
-The build generates a `version.properties` resource from that value.
+The Gradle project version is the single source of truth for the FlowProbe version.
 
-The CLI version provider reads the generated resource, which avoids maintaining a separate hardcoded version in the Picocli command.
+During the build, that value is written to a generated:
+
+```text
+version.properties
+```
+
+resource.
+
+The CLI version provider reads this resource, avoiding a separate hardcoded version in the Picocli command.
+
+Release tags must use the same version prefixed with `v`.
+
+For example:
+
+```text
+Gradle version: 0.1.0
+Git tag:        v0.1.0
+```
+
+Pre-release versions follow the same rule:
+
+```text
+Gradle version: 0.2.0-rc.1
+Git tag:        v0.2.0-rc.1
+```
 
 ## Release workflow
 
-The release workflow is:
+The release workflow is defined in:
 
 ```text
 .github/workflows/macos-native-release.yml
@@ -172,60 +204,119 @@ The release workflow is:
 
 It runs when a tag matching `v*` is pushed.
 
-Before creating a release, it validates that:
+Before building the release, the workflow verifies that:
 
 ```text
 tag == "v" + Gradle project version
 ```
 
-For example:
+The workflow then:
 
-```text
-Gradle version: 0.1.0-rc.4
-Tag:            v0.1.0-rc.4
-```
+1. Runs the JVM verification suite.
+2. Runs the operating-system keystore integration test.
+3. Builds Native Image executables for macOS x64 (Intel) and macOS arm64 (Apple Silicon).
+4. Smoke-tests the generated native executables.
+5. Executes a real HTTP flow against a temporary local server.
+6. Packages both native executables.
+7. Creates the GitHub release using the corresponding `CHANGELOG.md` entry.
+8. Updates the `ctorressoftware/homebrew-tap` formula with the release artifact URLs and SHA256 values.
 
-The workflow builds both macOS architectures:
+Versions containing a pre-release suffix, such as `0.2.0-rc.1`, are published as GitHub pre-releases.
 
-- x64 / Intel
-- arm64 / Apple Silicon
-
-It then publishes the GitHub release and updates the `ctorressoftware/homebrew-tap` formula with the generated artifact URLs and SHA256 values.
+Stable versions, such as `0.1.0`, are published as regular GitHub releases.
 
 ## Release preparation checklist
 
-Before pushing a release tag:
+Before pushing a release tag, verify that:
+
+- The version in `build.gradle.kts` matches the intended release.
+- `CHANGELOG.md` contains an entry for that exact version.
+- `README.md` and the relevant documentation reflect the release's features and limitations.
+- The release changes have been committed.
+- The repository references the canonical FlowProbe repository.
+
+Run the JVM verification suite:
 
 ```bash
 ./gradlew clean check
+```
+
+Run the operating-system credential-store integration test when the current environment supports it:
+
+```bash
+./gradlew osKeystoreTest
+```
+
+Build the native executable:
+
+```bash
 ./gradlew nativeCompile
 ```
 
-Verify the native CLI and the behavior changed by the release.
+Verify the generated executable:
 
-Then confirm:
+```bash
+./build/native/nativeCompile/flowprobe --version
+./build/native/nativeCompile/flowprobe --help
+./build/native/nativeCompile/flowprobe run --help
+./build/native/nativeCompile/flowprobe configure --help
+./build/native/nativeCompile/flowprobe run -f examples/normal-flow.yaml
+```
+
+The reported version must match the intended release version.
+
+If the release changes Native Image metadata, credential storage, serialization, or provider configuration, also exercise the affected native path directly.
+
+Before tagging, confirm the repository state:
 
 ```bash
 git status
 git log -5 --oneline
+git remote -v
 ```
 
-The working tree should be clean.
+The working tree should be clean and `origin` should point to:
 
-Create and push the annotated tag:
+```text
+https://github.com/ctorressoftware/flowprobe.git
+```
+
+### Create and push the release tag
+
+Set the version being released:
 
 ```bash
-git tag -a v<version> -m "FlowProbe v<version>"
-git push origin v<version>
-
-Example: v0.1.0-rc.4
+VERSION="0.1.0"
 ```
 
-For a stable release, use the corresponding stable version/tag instead.
+Create and push an annotated tag:
+
+```bash
+git tag -a "v${VERSION}" -m "FlowProbe v${VERSION}"
+git push origin "v${VERSION}"
+```
+
+For the first stable release, this creates:
+
+```text
+v0.1.0
+```
+
+Pushing the tag triggers the release workflow.
+
+### Failed release workflows
+
+If a workflow fails because of a temporary infrastructure or CI issue, rerun the failed jobs without modifying the tag.
+
+A failed workflow does not automatically mean that the tag should be deleted.
+
+Do not move or recreate a tag after a release has been publicly published.
+
+If the workflow fails before publication and requires a new commit, decide manually whether to recreate the unpublished tag or publish a new version.
 
 ## Homebrew verification
 
-After the tagged workflow updates the tap:
+After the tagged workflow publishes the GitHub release and updates the Homebrew tap:
 
 ```bash
 brew update
@@ -238,3 +329,18 @@ If necessary during local troubleshooting:
 ```bash
 brew reinstall ctorressoftware/tap/flowprobe
 ```
+
+Verify that the installed executable reports the expected version.
+
+For a stable release such as `v0.1.0`, the expected output is:
+
+```text
+flowprobe 0.1.0
+```
+
+## Release references
+
+- [GitHub Releases](https://github.com/ctorressoftware/flowprobe/releases)
+- [Changelog](../CHANGELOG.md)
+- [Native Image documentation](native-image.md)
+- [Homebrew tap](https://github.com/ctorressoftware/homebrew-tap)
