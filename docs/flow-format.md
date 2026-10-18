@@ -113,7 +113,7 @@ expect:
       
     - path: "/name"
       operator: "contains"
-      value: "pika"
+      value: "bulba"
 ```
 
 FlowProbe extracts the actual JSON value from each path and evaluates it against the expected value.
