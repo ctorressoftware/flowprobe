@@ -10,7 +10,7 @@ A flow can call an endpoint, validate its response, export values from the JSON 
 
 It stops on the first failed step, renders a reproducible cURL command, and can optionally create an Azure DevOps work item with the failure context.
 
-> **Project status:** `v0.1.0-rc.4` is the current release candidate and is intended as the final validation candidate before `v0.1.0`.
+> **Project status:** `v0.1.0` is the first stable release of FlowProbe.
 
 ---
 
@@ -44,7 +44,7 @@ Because the flow lives in YAML, the same verification can be reviewed in source 
 - Ordered multi-step HTTP flows defined in YAML.
 - Exact status expectations and default `2xx` success behavior.
 - JSON body expectations using JSON Pointer paths.
-- `equals` and `notEquals` expectation operators.
+- `equals`, `notEquals`, and `contains` expectation operators.
 - Typed JSON exports reused through `${placeholders}`.
 - Placeholder resolution in URLs, HTTP methods, headers, object keys, request bodies, lists, and response expectation values.
 - Type preservation for exact placeholders.
@@ -80,10 +80,10 @@ Verify the installation:
 flowprobe --version
 ```
 
-Expected for this release candidate:
+Current stable version:
 
 ```text
-flowprobe 0.1.0-rc.4
+flowprobe 0.1.0
 ```
 
 ### Build from source
@@ -288,10 +288,9 @@ The examples cover basic status validation, body expectations, exports, typed pl
 
 ## Current limitations
 
-- Official pre-release binaries are currently published only for macOS x64 (Intel) and macOS arm64 (Apple Silicon).
+- Official native binaries are currently published only for macOS x64 (Intel) and macOS arm64 (Apple Silicon).
 - Azure DevOps is the only implemented ticket provider.
 - cURL is the only request renderer currently exposed.
-- Body expectations currently support only `equals` and `notEquals`.
 - Explicit `value: null` body expectations are not yet supported.
 - Placeholder interpolation in URLs is textual; FlowProbe does not automatically URL-encode user-provided placeholder values.
 - Failed body expectations are tracked internally, but the CLI does not yet display which expectation failed or its expected and actual values.
@@ -316,7 +315,7 @@ For planned improvements and future features, see the [Roadmap](docs/roadmap.md)
 
 ## Current version
 
-**Release candidate:** `v0.1.0-rc.4`
+**Version:** `v0.1.0`
 
 See [GitHub Releases](https://github.com/ctorressoftware/flowprobe/releases) for published releases and [CHANGELOG.md](CHANGELOG.md) for version history.
 

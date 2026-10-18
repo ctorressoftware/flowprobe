@@ -94,6 +94,7 @@ Currently supported operators:
 ```text
 equals
 notEquals
+contains
 ```
 
 Multiple expectations can be declared:
@@ -109,6 +110,10 @@ expect:
     - path: "/name"
       operator: "notEquals"
       value: "pikachu"
+      
+    - path: "/name"
+      operator: "contains"
+      value: "pika"
 ```
 
 FlowProbe extracts the actual JSON value from each path and evaluates it against the expected value.

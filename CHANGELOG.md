@@ -4,6 +4,22 @@ All notable changes to FlowProbe are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project follows semantic versioning conventions for its release identifiers.
 
+## [0.1.0] - 2026-10-17
+
+First stable release of FlowProbe.
+
+FlowProbe `0.1.0` consolidates the release candidate series with YAML-defined multistep HTTP flows, response validation, typed exports and placeholders, fail-fast execution, reproducible cURL output, optional Azure DevOps work-item creation, GraalVM Native Image builds, and Homebrew distribution.
+
+### Added
+
+- Added the `contains` body expectation operator for case-sensitive substring validation.
+- Added a project roadmap for planned expectation operators and future improvements.
+
+### Changed
+
+- Standardized the project, repository, Native Image metadata, and release references under the `flowprobe` name.
+- Updated project documentation for the first stable release.
+
 ## [0.1.0-rc.4] - 2026-10-03
 
 ### Added
