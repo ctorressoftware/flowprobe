@@ -116,6 +116,8 @@ expect:
       value: "bulba"
 ```
 
+The `contains` operator performs case-sensitive substring matching and requires both values to be strings.
+
 FlowProbe extracts the actual JSON value from each path and evaluates it against the expected value.
 
 ## Exports
