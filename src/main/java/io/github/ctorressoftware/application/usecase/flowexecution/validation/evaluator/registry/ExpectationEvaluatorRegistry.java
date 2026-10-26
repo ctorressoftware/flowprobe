@@ -1,4 +1,4 @@
-package io.github.ctorressoftware.application.usecase.flowexecution.validation.evaluator;
+package io.github.ctorressoftware.application.usecase.flowexecution.validation.evaluator.registry;
 
 import io.github.ctorressoftware.domain.model.ExpectationOperator;
 
@@ -9,9 +9,9 @@ import java.util.stream.Collectors;
 
 public final class ExpectationEvaluatorRegistry {
 
-    private final Map<ExpectationOperator, ExpectationEvaluator> evaluators;
+    private final Map<ExpectationOperator, ExpectationEvaluator<?>> evaluators;
 
-    public ExpectationEvaluatorRegistry(List<ExpectationEvaluator> evaluators) {
+    public ExpectationEvaluatorRegistry(List<ExpectationEvaluator<?>> evaluators) {
         this.evaluators = evaluators.stream()
                 .collect(Collectors.toUnmodifiableMap(
                         ExpectationEvaluator::operator,
@@ -19,9 +19,9 @@ public final class ExpectationEvaluatorRegistry {
                 ));
     }
 
-    public ExpectationEvaluator get(ExpectationOperator operator) {
+    public ExpectationEvaluator<?> get(ExpectationOperator operator) {
 
-        ExpectationEvaluator evaluator = evaluators.get(operator);
+        ExpectationEvaluator<?> evaluator = evaluators.get(operator);
 
         if (evaluator == null) {
             throw new IllegalArgumentException("No evaluator registered for operator: " + operator);
