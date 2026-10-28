@@ -1,9 +1,12 @@
 package io.github.ctorressoftware.application.usecase.flowexecution.validation.evaluator;
 
+import io.github.ctorressoftware.application.usecase.flowexecution.validation.evaluator.registry.BinaryEvaluationInput;
+import io.github.ctorressoftware.application.usecase.flowexecution.validation.evaluator.registry.ExpectationEvaluator;
 import io.github.ctorressoftware.domain.model.ExpectationOperator;
 import io.github.ctorressoftware.domain.model.ExpectationResult;
 
-public class ContainsExpectationEvaluator implements ExpectationEvaluator {
+public class ContainsExpectationEvaluator
+        implements ExpectationEvaluator<BinaryEvaluationInput> {
 
     @Override
     public ExpectationOperator operator() {
@@ -11,17 +14,22 @@ public class ContainsExpectationEvaluator implements ExpectationEvaluator {
     }
 
     @Override
-    public ExpectationResult evaluate(Object sentence, Object subString) {
+    public Class<BinaryEvaluationInput> inputType() {
+        return BinaryEvaluationInput.class;
+    }
+
+    @Override
+    public ExpectationResult evaluate(BinaryEvaluationInput input) {
 
         boolean successful =
-                sentence instanceof String sentenceStr
-                        && subString instanceof String subStringStr
-                        && sentenceStr.contains(subStringStr);
+                input.expected() instanceof String sentenceStr
+                        && input.actual() instanceof String subStringStr
+                        && subStringStr.contains(sentenceStr);
 
         return new ExpectationResult(
                 successful,
-                subString,
-                sentence
+                input.expected(),
+                input.actual()
         );
     }
 }

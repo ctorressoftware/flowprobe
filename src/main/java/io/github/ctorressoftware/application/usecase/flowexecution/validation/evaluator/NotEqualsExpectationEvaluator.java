@@ -1,11 +1,14 @@
 package io.github.ctorressoftware.application.usecase.flowexecution.validation.evaluator;
 
+import io.github.ctorressoftware.application.usecase.flowexecution.validation.evaluator.registry.BinaryEvaluationInput;
+import io.github.ctorressoftware.application.usecase.flowexecution.validation.evaluator.registry.ExpectationEvaluator;
 import io.github.ctorressoftware.domain.model.ExpectationResult;
 import io.github.ctorressoftware.domain.model.ExpectationOperator;
 
 import java.util.Objects;
 
-public class NotEqualsExpectationEvaluator implements ExpectationEvaluator {
+public class NotEqualsExpectationEvaluator
+        implements ExpectationEvaluator<BinaryEvaluationInput> {
 
     @Override
     public ExpectationOperator operator() {
@@ -13,14 +16,19 @@ public class NotEqualsExpectationEvaluator implements ExpectationEvaluator {
     }
 
     @Override
-    public ExpectationResult evaluate(Object actual, Object expected) {
+    public Class<BinaryEvaluationInput> inputType() {
+        return BinaryEvaluationInput.class;
+    }
 
-        boolean successful = !Objects.equals(actual, expected);
+    @Override
+    public ExpectationResult evaluate(BinaryEvaluationInput input) {
+
+        boolean successful = !Objects.equals(input.actual(), input.expected());
 
         return new ExpectationResult(
                 successful,
-                expected,
-                actual
+                input.expected(),
+                input.actual()
         );
     }
 }
