@@ -14,11 +14,10 @@ import io.github.ctorressoftware.application.usecase.CreateImpedimentTicketHandl
 import io.github.ctorressoftware.application.usecase.ExecuteFlowHandler;
 import io.github.ctorressoftware.application.usecase.ReadFileHandler;
 import io.github.ctorressoftware.application.usecase.flowexecution.*;
-import io.github.ctorressoftware.application.usecase.flowexecution.validation.BodyValidator;
-import io.github.ctorressoftware.application.usecase.flowexecution.validation.DefaultResponseValidator;
-import io.github.ctorressoftware.application.usecase.flowexecution.validation.ResponseValidator;
-import io.github.ctorressoftware.application.usecase.flowexecution.validation.StatusValidator;
+import io.github.ctorressoftware.application.usecase.flowexecution.validation.*;
 import io.github.ctorressoftware.application.usecase.flowexecution.validation.evaluator.*;
+import io.github.ctorressoftware.application.usecase.flowexecution.validation.evaluator.registry.ExpectationEvaluator;
+import io.github.ctorressoftware.application.usecase.flowexecution.validation.evaluator.registry.ExpectationEvaluatorRegistry;
 import io.github.ctorressoftware.application.usecase.provider.configure.ConfigureProviderHandler;
 import io.github.ctorressoftware.domain.model.Context;
 import io.github.ctorressoftware.infrastructure.callservice.RequestMapper;
@@ -62,17 +61,20 @@ public final class AppConfig {
     private final ExpectationEvaluator equalsExpectationEvaluator = new EqualsExpectationEvaluator();
     private final ExpectationEvaluator notEqualsExpectationEvaluator = new NotEqualsExpectationEvaluator();
     private final ExpectationEvaluator containsExpectationEvaluator = new ContainsExpectationEvaluator();
+    private final ExpectationEvaluator existsExpectationEvaluator = new ExistsExpectationEvaluator();
     private final ExpectationEvaluatorRegistry registry = new ExpectationEvaluatorRegistry(List.of(
             equalsExpectationEvaluator,
             notEqualsExpectationEvaluator,
-            containsExpectationEvaluator
+            containsExpectationEvaluator,
+            existsExpectationEvaluator
     ));
     private final HttpClient httpClient = HttpClient.newBuilder()
             .connectTimeout(HTTP_CONNECT_TIMEOUT)
             .build();
     private final ServiceCaller serviceCaller = new RestServiceCaller(httpClient, requestMapper);
-    private final StatusValidator statusValidator = new StatusValidator(registry);
-    private final BodyValidator bodyValidator = new BodyValidator(jsonProcessor, registry);
+    private final ExpectationEvaluationDispatcher dispatcher = new ExpectationEvaluationDispatcher(registry);
+    private final StatusValidator statusValidator = new StatusValidator(dispatcher);
+    private final BodyValidator bodyValidator = new BodyValidator(jsonProcessor, dispatcher);
     private final ResponseValidator responseValidator = new DefaultResponseValidator(statusValidator, bodyValidator);
     private final Executor executor = new FlowExecutor(contextManager, serviceCaller, placeholderResolver, responseValidator);
     private final ExecuteFlowUseCase executeFlowUseCase = new ExecuteFlowHandler(executor);
