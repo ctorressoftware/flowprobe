@@ -1,8 +1,7 @@
 package io.github.ctorressoftware.application.usecase.flowexecution.validation;
 
 import io.github.ctorressoftware.application.port.out.JsonProcessor;
-import io.github.ctorressoftware.application.usecase.flowexecution.validation.evaluator.ExpectationEvaluator;
-import io.github.ctorressoftware.application.usecase.flowexecution.validation.evaluator.ExpectationEvaluatorRegistry;
+import io.github.ctorressoftware.application.usecase.flowexecution.validation.evaluator.registry.BinaryEvaluationInput;
 import io.github.ctorressoftware.domain.model.ExpectationResult;
 import io.github.ctorressoftware.domain.model.BodyExpectation;
 import io.github.ctorressoftware.domain.model.ExpectationOperator;
@@ -23,19 +22,13 @@ class BodyValidatorTest {
     private JsonProcessor jsonProcessor;
 
     @Mock
-    private ExpectationEvaluatorRegistry registry;
-
-    @Mock
-    private ExpectationEvaluator equalsEvaluator;
-
-    @Mock
-    private ExpectationEvaluator notEqualsEvaluator;
+    private ExpectationEvaluationDispatcher dispatcher;
 
     private BodyValidator bodyValidator;
 
     @BeforeEach
     void init() {
-        bodyValidator = new BodyValidator(jsonProcessor, registry);
+        bodyValidator = new BodyValidator(jsonProcessor, dispatcher);
     }
 
     @Test
@@ -81,19 +74,17 @@ class BodyValidatorTest {
                 .thenReturn("grass");
 
         Mockito
-                .when(registry.get(ExpectationOperator.EQUALS))
-                .thenReturn(equalsEvaluator);
-
-        Mockito
-                .when(registry.get(ExpectationOperator.NOT_EQUALS))
-                .thenReturn(notEqualsEvaluator);
-
-        Mockito
-                .when(equalsEvaluator.evaluate("bulbasaur", "bulbasaur"))
+                .when(dispatcher.evaluate(
+                        ExpectationOperator.EQUALS,
+                        new BinaryEvaluationInput("bulbasaur", "bulbasaur")
+                ))
                 .thenReturn(nameResult);
 
         Mockito
-                .when(notEqualsEvaluator.evaluate("grass", "fire"))
+                .when(dispatcher.evaluate(
+                        ExpectationOperator.NOT_EQUALS,
+                        new BinaryEvaluationInput("grass", "fire")
+                ))
                 .thenReturn(typeResult);
 
         List<ExpectationResult> results = bodyValidator.validate(
@@ -106,13 +97,26 @@ class BodyValidatorTest {
                 results
         );
 
-        Mockito.verify(jsonProcessor).extractValue(responseBody, "/name");
-        Mockito.verify(jsonProcessor).extractValue(responseBody, "/type");
-        Mockito.verify(registry).get(ExpectationOperator.EQUALS);
-        Mockito.verify(registry).get(ExpectationOperator.NOT_EQUALS);
-        Mockito.verify(equalsEvaluator).evaluate("bulbasaur", "bulbasaur");
-        Mockito.verify(notEqualsEvaluator).evaluate("grass", "fire");
-        Mockito.verifyNoMoreInteractions(jsonProcessor, registry, equalsEvaluator, notEqualsEvaluator);
+        Mockito.verify(jsonProcessor)
+                .extractValue(responseBody, "/name");
+
+        Mockito.verify(jsonProcessor)
+                .extractValue(responseBody, "/type");
+
+        Mockito.verify(dispatcher).evaluate(
+                ExpectationOperator.EQUALS,
+                new BinaryEvaluationInput("bulbasaur", "bulbasaur")
+        );
+
+        Mockito.verify(dispatcher).evaluate(
+                ExpectationOperator.NOT_EQUALS,
+                new BinaryEvaluationInput("grass", "fire")
+        );
+
+        Mockito.verifyNoMoreInteractions(
+                jsonProcessor,
+                dispatcher
+        );
     }
 
     @Test
@@ -127,9 +131,7 @@ class BodyValidatorTest {
 
         Mockito.verifyNoInteractions(
                 jsonProcessor,
-                registry,
-                equalsEvaluator,
-                notEqualsEvaluator
+                dispatcher
         );
     }
 }

@@ -3,12 +3,9 @@ package io.github.ctorressoftware.application.usecase.flowexecution;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.ctorressoftware.application.port.out.JsonProcessor;
 import io.github.ctorressoftware.application.port.out.ServiceCaller;
-import io.github.ctorressoftware.application.usecase.flowexecution.validation.BodyValidator;
-import io.github.ctorressoftware.application.usecase.flowexecution.validation.DefaultResponseValidator;
-import io.github.ctorressoftware.application.usecase.flowexecution.validation.ResponseValidator;
-import io.github.ctorressoftware.application.usecase.flowexecution.validation.StatusValidator;
+import io.github.ctorressoftware.application.usecase.flowexecution.validation.*;
 import io.github.ctorressoftware.application.usecase.flowexecution.validation.evaluator.EqualsExpectationEvaluator;
-import io.github.ctorressoftware.application.usecase.flowexecution.validation.evaluator.ExpectationEvaluatorRegistry;
+import io.github.ctorressoftware.application.usecase.flowexecution.validation.evaluator.registry.ExpectationEvaluatorRegistry;
 import io.github.ctorressoftware.application.usecase.flowexecution.validation.evaluator.NotEqualsExpectationEvaluator;
 import io.github.ctorressoftware.domain.constant.HttpMethod;
 import io.github.ctorressoftware.domain.constant.HttpStatusCode;
@@ -36,6 +33,7 @@ class FlowExecutorTest {
     private JsonProcessor jsonProcessor;
     private ContextManager contextManager;
     private ExpectationEvaluatorRegistry registry;
+    private ExpectationEvaluationDispatcher dispatcher;
     private StatusValidator statusValidator;
     private BodyValidator bodyValidator;
     private ResponseValidator responseValidator;
@@ -49,8 +47,9 @@ class FlowExecutorTest {
                 new EqualsExpectationEvaluator(),
                 new NotEqualsExpectationEvaluator()
         ));
-        this.statusValidator = new StatusValidator(registry);
-        this.bodyValidator = new BodyValidator(jsonProcessor, registry);
+        this.dispatcher = new ExpectationEvaluationDispatcher(registry);
+        this.statusValidator = new StatusValidator(dispatcher);
+        this.bodyValidator = new BodyValidator(jsonProcessor, dispatcher);
         this.responseValidator = new DefaultResponseValidator(statusValidator, bodyValidator);
         this.flowExecutor = new FlowExecutor(
                 contextManager,

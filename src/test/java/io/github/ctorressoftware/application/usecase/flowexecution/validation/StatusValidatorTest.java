@@ -1,7 +1,6 @@
 package io.github.ctorressoftware.application.usecase.flowexecution.validation;
 
-import io.github.ctorressoftware.application.usecase.flowexecution.validation.evaluator.ExpectationEvaluator;
-import io.github.ctorressoftware.application.usecase.flowexecution.validation.evaluator.ExpectationEvaluatorRegistry;
+import io.github.ctorressoftware.application.usecase.flowexecution.validation.evaluator.registry.BinaryEvaluationInput;
 import io.github.ctorressoftware.domain.model.ExpectationResult;
 import io.github.ctorressoftware.domain.constant.HttpStatusCode;
 import io.github.ctorressoftware.domain.model.ExpectationOperator;
@@ -17,16 +16,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class StatusValidatorTest {
 
     @Mock
-    private ExpectationEvaluatorRegistry registry;
-
-    @Mock
-    private ExpectationEvaluator evaluator;
-
+    private ExpectationEvaluationDispatcher dispatcher;
     private StatusValidator statusValidator;
 
     @BeforeEach
     void init() {
-        statusValidator = new StatusValidator(registry);
+        statusValidator = new StatusValidator(dispatcher);
     }
 
     @Test
@@ -41,12 +36,13 @@ class StatusValidatorTest {
                 actualStatus
         );
 
-        Mockito
-                .when(registry.get(ExpectationOperator.EQUALS))
-                .thenReturn(evaluator);
+        BinaryEvaluationInput input = new BinaryEvaluationInput(
+                actualStatus,
+                expectedStatus
+        );
 
         Mockito
-                .when(evaluator.evaluate(actualStatus, expectedStatus))
+                .when(dispatcher.evaluate(ExpectationOperator.EQUALS, input))
                 .thenReturn(expectedResult);
 
         ExpectationResult result = statusValidator.validate(
@@ -55,8 +51,12 @@ class StatusValidatorTest {
         );
 
         Assertions.assertSame(expectedResult, result);
-        Mockito.verify(registry).get(ExpectationOperator.EQUALS);
-        Mockito.verify(evaluator).evaluate(actualStatus, expectedStatus);
-        Mockito.verifyNoMoreInteractions(registry, evaluator);
+
+        Mockito.verify(dispatcher).evaluate(
+                ExpectationOperator.EQUALS,
+                input
+        );
+
+        Mockito.verifyNoMoreInteractions(dispatcher);
     }
 }

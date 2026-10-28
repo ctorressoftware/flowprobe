@@ -1,5 +1,6 @@
 package io.github.ctorressoftware.application.usecase.flowexecution.validation.evaluator;
 
+import io.github.ctorressoftware.application.usecase.flowexecution.validation.evaluator.registry.BinaryEvaluationInput;
 import io.github.ctorressoftware.domain.model.ExpectationResult;
 import io.github.ctorressoftware.domain.model.ExpectationOperator;
 import org.junit.jupiter.api.Assertions;
@@ -27,10 +28,10 @@ class EqualsExpectationEvaluatorTest {
     @Test
     void shouldReturnSuccessfulResultWhenValuesAreEqual() {
 
-        ExpectationResult result = evaluator.evaluate(
+        ExpectationResult result = evaluator.evaluate(new BinaryEvaluationInput(
                 "bulbasaur",
                 "bulbasaur"
-        );
+        ));
 
         Assertions.assertTrue(result.successful());
         Assertions.assertEquals("bulbasaur", result.expected());
@@ -40,10 +41,10 @@ class EqualsExpectationEvaluatorTest {
     @Test
     void shouldReturnFailedResultWhenValuesAreDifferent() {
 
-        ExpectationResult result = evaluator.evaluate(
+        ExpectationResult result = evaluator.evaluate(new BinaryEvaluationInput(
                 "pikachu",
                 "bulbasaur"
-        );
+        ));
 
         Assertions.assertFalse(result.successful());
         Assertions.assertEquals("bulbasaur", result.expected());
@@ -53,10 +54,10 @@ class EqualsExpectationEvaluatorTest {
     @Test
     void shouldReturnSuccessfulResultWhenBothValuesAreNull() {
 
-        ExpectationResult result = evaluator.evaluate(
+        ExpectationResult result = evaluator.evaluate(new BinaryEvaluationInput(
                 null,
                 null
-        );
+        ));
 
         Assertions.assertTrue(result.successful());
         Assertions.assertNull(result.expected());
@@ -66,10 +67,10 @@ class EqualsExpectationEvaluatorTest {
     @Test
     void shouldReturnFailedResultWhenOnlyActualValueIsNull() {
 
-        ExpectationResult result = evaluator.evaluate(
+        ExpectationResult result = evaluator.evaluate(new BinaryEvaluationInput(
                 null,
                 "bulbasaur"
-        );
+        ));
 
         Assertions.assertFalse(result.successful());
         Assertions.assertEquals("bulbasaur", result.expected());
@@ -79,10 +80,10 @@ class EqualsExpectationEvaluatorTest {
     @Test
     void shouldReturnFailedResultWhenOnlyExpectedValueIsNull() {
 
-        ExpectationResult result = evaluator.evaluate(
+        ExpectationResult result = evaluator.evaluate(new BinaryEvaluationInput(
                 "bulbasaur",
                 null
-        );
+        ));
 
         Assertions.assertFalse(result.successful());
         Assertions.assertNull(result.expected());

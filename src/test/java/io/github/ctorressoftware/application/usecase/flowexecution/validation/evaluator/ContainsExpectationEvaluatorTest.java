@@ -1,5 +1,6 @@
 package io.github.ctorressoftware.application.usecase.flowexecution.validation.evaluator;
 
+import io.github.ctorressoftware.application.usecase.flowexecution.validation.evaluator.registry.BinaryEvaluationInput;
 import io.github.ctorressoftware.domain.model.ExpectationOperator;
 import io.github.ctorressoftware.domain.model.ExpectationResult;
 import org.junit.jupiter.api.Assertions;
@@ -27,10 +28,10 @@ class ContainsExpectationEvaluatorTest {
     @Test
     void shouldReturnSuccessfulResultWhenSentenceContainsSubString() {
 
-        ExpectationResult result = evaluator.evaluate(
+        ExpectationResult result = evaluator.evaluate(new BinaryEvaluationInput(
                 "mega-bulbasaur",
                 "bulbasaur"
-        );
+        ));
 
         Assertions.assertTrue(result.successful());
     }
@@ -38,10 +39,10 @@ class ContainsExpectationEvaluatorTest {
     @Test
     void shouldReturnFailedResultWhenSentenceNotContainsSubString() {
 
-        ExpectationResult result = evaluator.evaluate(
+        ExpectationResult result = evaluator.evaluate(new BinaryEvaluationInput(
                 "pikachu",
                 "bulbasaur"
-        );
+        ));
 
         Assertions.assertFalse(result.successful());
         Assertions.assertEquals("bulbasaur", result.expected());
