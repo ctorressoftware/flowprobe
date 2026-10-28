@@ -1,25 +1,24 @@
 package io.github.ctorressoftware.application.usecase.flowexecution.validation;
 
-import io.github.ctorressoftware.application.usecase.flowexecution.validation.evaluator.ExpectationEvaluator;
-import io.github.ctorressoftware.application.usecase.flowexecution.validation.evaluator.ExpectationEvaluatorRegistry;
+import io.github.ctorressoftware.application.usecase.flowexecution.validation.evaluator.registry.BinaryEvaluationInput;
 import io.github.ctorressoftware.domain.model.ExpectationResult;
 import io.github.ctorressoftware.domain.model.ExpectationOperator;
 
 public final class StatusValidator {
 
-    private final ExpectationEvaluatorRegistry registry;
+    private final ExpectationEvaluationDispatcher dispatcher;
 
-    public StatusValidator(ExpectationEvaluatorRegistry registry) {
-        this.registry = registry;
+    public StatusValidator(ExpectationEvaluationDispatcher dispatcher) {
+        this.dispatcher = dispatcher;
     }
 
-    public ExpectationResult validate(int actualStatus, Integer expectedStatus) {
+    public ExpectationResult validate(
+            int actualStatus,
+            Integer expectedStatus) {
 
-        ExpectationEvaluator evaluator = registry.get(ExpectationOperator.EQUALS);
-
-        return evaluator.evaluate(
-                actualStatus,
-                expectedStatus
+        return dispatcher.evaluate(
+                ExpectationOperator.EQUALS,
+                new BinaryEvaluationInput(actualStatus, expectedStatus)
         );
     }
 }
