@@ -18,13 +18,10 @@ import io.github.ctorressoftware.application.usecase.ReadFileHandler;
 import io.github.ctorressoftware.application.usecase.flowexecution.ContextManager;
 import io.github.ctorressoftware.application.usecase.flowexecution.FlowExecutor;
 import io.github.ctorressoftware.application.usecase.flowexecution.PlaceholderResolver;
-import io.github.ctorressoftware.application.usecase.flowexecution.validation.BodyValidator;
-import io.github.ctorressoftware.application.usecase.flowexecution.validation.DefaultResponseValidator;
-import io.github.ctorressoftware.application.usecase.flowexecution.validation.ResponseValidator;
-import io.github.ctorressoftware.application.usecase.flowexecution.validation.StatusValidator;
+import io.github.ctorressoftware.application.usecase.flowexecution.validation.*;
 import io.github.ctorressoftware.application.usecase.flowexecution.validation.evaluator.ContainsExpectationEvaluator;
 import io.github.ctorressoftware.application.usecase.flowexecution.validation.evaluator.EqualsExpectationEvaluator;
-import io.github.ctorressoftware.application.usecase.flowexecution.validation.evaluator.ExpectationEvaluatorRegistry;
+import io.github.ctorressoftware.application.usecase.flowexecution.validation.evaluator.registry.ExpectationEvaluatorRegistry;
 import io.github.ctorressoftware.application.usecase.flowexecution.validation.evaluator.NotEqualsExpectationEvaluator;
 import io.github.ctorressoftware.domain.model.Context;
 import io.github.ctorressoftware.domain.model.FilePath;
@@ -107,9 +104,11 @@ class FlowProbeE2ETest {
                 new ContainsExpectationEvaluator()
         ));
 
+        ExpectationEvaluationDispatcher dispatcher = new ExpectationEvaluationDispatcher(registry);
+
         return new DefaultResponseValidator(
-                new StatusValidator(registry),
-                new BodyValidator(jsonProcessor, registry)
+                new StatusValidator(dispatcher),
+                new BodyValidator(jsonProcessor, dispatcher)
         );
     }
 
