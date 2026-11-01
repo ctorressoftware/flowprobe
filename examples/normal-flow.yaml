@@ -10,6 +10,8 @@ steps:
     expect:
       status: 200
       body:
+        - path: "/error"
+          operator: "notExists"
         - path: "/results/0/name"
           operator: "equals"
           value: "bulbasaur"
