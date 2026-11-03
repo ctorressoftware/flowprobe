@@ -21,7 +21,7 @@ class ExpectationEvaluatorRegistryTest {
                 notEqualsEvaluator
         ));
 
-        ExpectationEvaluator evaluator = registry.get(ExpectationOperator.EQUALS);
+        ExpectationEvaluator<?> evaluator = registry.get(ExpectationOperator.EQUALS);
         Assertions.assertSame(equalsEvaluator, evaluator);
     }
 
