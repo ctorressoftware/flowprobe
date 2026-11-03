@@ -29,11 +29,6 @@ public final class PlaceholderResolver {
     }
 
     public Object resolve(List<ContextVariable> variables, Object object) {
-
-        if (object == null) {
-            throw new IllegalArgumentException("object cannot be null");
-        }
-
         return resolveValue(variables, object);
     }
 

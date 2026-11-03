@@ -269,12 +269,4 @@ class PlaceholderResolverTest {
         Assertions.assertEquals("pokemon-bulbasaur", result);
         Assertions.assertInstanceOf(String.class, result);
     }
-
-    @Test
-    void shouldThrowWhenResolvingNullObject() {
-        Assertions.assertThrows(
-                IllegalArgumentException.class,
-                () -> placeholderResolver.resolve(List.of(), (Object) null)
-        );
-    }
 }
