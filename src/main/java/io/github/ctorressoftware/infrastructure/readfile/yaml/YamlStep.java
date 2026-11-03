@@ -1,7 +1,6 @@
 package io.github.ctorressoftware.infrastructure.readfile.yaml;
 
 import java.util.Map;
-import java.util.Objects;
 
 public class YamlStep {
     private String name;

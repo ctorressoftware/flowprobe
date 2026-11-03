@@ -1,7 +1,6 @@
 package io.github.ctorressoftware.infrastructure.readfile.yaml;
 
 import java.util.List;
-import java.util.Objects;
 
 public class YamlFlow {
     private String name;

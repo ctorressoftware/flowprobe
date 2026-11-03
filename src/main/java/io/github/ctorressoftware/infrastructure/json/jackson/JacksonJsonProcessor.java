@@ -1,15 +1,12 @@
 package io.github.ctorressoftware.infrastructure.json.jackson;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.ctorressoftware.application.exception.JsonDeserializationException;
 import io.github.ctorressoftware.application.exception.JsonExtractionException;
 import io.github.ctorressoftware.application.exception.JsonSerializationException;
 import io.github.ctorressoftware.application.port.out.JsonProcessor;
-
-import java.util.Map;
 
 public class JacksonJsonProcessor implements JsonProcessor {
 

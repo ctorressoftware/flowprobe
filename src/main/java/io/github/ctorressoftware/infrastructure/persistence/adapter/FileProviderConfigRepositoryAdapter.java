@@ -1,21 +1,13 @@
 package io.github.ctorressoftware.infrastructure.persistence.adapter;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.ctorressoftware.application.port.out.CredentialsStorageManager;
 import io.github.ctorressoftware.application.port.out.ProviderConfig;
 import io.github.ctorressoftware.application.port.out.ProviderConfigRepository;
 
 public class FileProviderConfigRepositoryAdapter implements ProviderConfigRepository {
 
-    private final ObjectMapper objectMapper;
-    private final CredentialsStorageManager credentialsStorageManager;
+    // private final CredentialsStorageManager credentialsStorageManager;
 
-    public FileProviderConfigRepositoryAdapter(
-            ObjectMapper objectMapper,
-            CredentialsStorageManager credentialsStorageManager
-    ) {
-        this.objectMapper = objectMapper;
-        this.credentialsStorageManager = credentialsStorageManager;
+    public FileProviderConfigRepositoryAdapter() {
         throw new UnsupportedOperationException("Unsupported operation yet");
     }
 

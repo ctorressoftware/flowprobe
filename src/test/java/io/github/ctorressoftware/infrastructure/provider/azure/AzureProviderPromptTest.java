@@ -11,7 +11,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.Console;
 import java.io.PrintStream;
-import java.util.Map;
 import java.util.Scanner;
 
 @ExtendWith(MockitoExtension.class)
