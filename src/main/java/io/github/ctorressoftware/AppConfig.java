@@ -16,7 +16,6 @@ import io.github.ctorressoftware.application.usecase.ReadFileHandler;
 import io.github.ctorressoftware.application.usecase.flowexecution.*;
 import io.github.ctorressoftware.application.usecase.flowexecution.validation.*;
 import io.github.ctorressoftware.application.usecase.flowexecution.validation.evaluator.*;
-import io.github.ctorressoftware.application.usecase.flowexecution.validation.evaluator.registry.ExpectationEvaluator;
 import io.github.ctorressoftware.application.usecase.flowexecution.validation.evaluator.registry.ExpectationEvaluatorRegistry;
 import io.github.ctorressoftware.application.usecase.provider.configure.ConfigureProviderHandler;
 import io.github.ctorressoftware.domain.model.Context;
@@ -58,15 +57,11 @@ public final class AppConfig {
     private final ReadFileUseCase readFileUseCase = new ReadFileHandler(flowFileReader);
     private final ContextManager contextManager = new ContextManager(context, jsonProcessor);
     private final RequestMapper requestMapper = new RequestMapper(jsonProcessor, HTTP_REQUEST_TIMEOUT);
-    private final ExpectationEvaluator equalsExpectationEvaluator = new EqualsExpectationEvaluator();
-    private final ExpectationEvaluator notEqualsExpectationEvaluator = new NotEqualsExpectationEvaluator();
-    private final ExpectationEvaluator containsExpectationEvaluator = new ContainsExpectationEvaluator();
-    private final ExpectationEvaluator existsExpectationEvaluator = new ExistsExpectationEvaluator();
     private final ExpectationEvaluatorRegistry registry = new ExpectationEvaluatorRegistry(List.of(
-            equalsExpectationEvaluator,
-            notEqualsExpectationEvaluator,
-            containsExpectationEvaluator,
-            existsExpectationEvaluator
+            new EqualsExpectationEvaluator(),
+            new NotEqualsExpectationEvaluator(),
+            new ContainsExpectationEvaluator(),
+            new ExistsExpectationEvaluator()
     ));
     private final HttpClient httpClient = HttpClient.newBuilder()
             .connectTimeout(HTTP_CONNECT_TIMEOUT)
