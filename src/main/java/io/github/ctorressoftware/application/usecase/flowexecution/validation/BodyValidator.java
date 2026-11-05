@@ -2,6 +2,7 @@ package io.github.ctorressoftware.application.usecase.flowexecution.validation;
 
 import io.github.ctorressoftware.application.port.out.JsonProcessor;
 import io.github.ctorressoftware.application.usecase.flowexecution.validation.evaluator.registry.*;
+import io.github.ctorressoftware.application.usecase.flowexecution.validation.extraction.ExtractedValue;
 import io.github.ctorressoftware.domain.model.ExpectationOperator;
 import io.github.ctorressoftware.domain.model.ExpectationResult;
 import io.github.ctorressoftware.domain.model.BodyExpectation;
@@ -32,14 +33,14 @@ public final class BodyValidator {
     ) {
         ExpectationOperator operator = expectation.operator();
 
-        Object actual = jsonProcessor.extractValue(
+        ExtractedValue extracted = jsonProcessor.extractValue(
                 responseBody,
                 expectation.path()
         );
 
         EvaluationInput input = operator.requiresValue()
-                ? new BinaryEvaluationInput(actual, expectation.expectedValue())
-                : new UnaryEvaluationInput(actual);
+                ? new BinaryEvaluationInput(extracted.value(), expectation.expectedValue())
+                : new UnaryEvaluationInput(extracted.value());
 
         return dispatcher.evaluate(operator, input);
     }
