@@ -2,6 +2,7 @@ package io.github.ctorressoftware.application.usecase.flowexecution.validation;
 
 import io.github.ctorressoftware.application.port.out.JsonProcessor;
 import io.github.ctorressoftware.application.usecase.flowexecution.validation.evaluator.registry.BinaryEvaluationInput;
+import io.github.ctorressoftware.application.usecase.flowexecution.validation.extraction.ExtractedValue;
 import io.github.ctorressoftware.domain.model.ExpectationResult;
 import io.github.ctorressoftware.domain.model.BodyExpectation;
 import io.github.ctorressoftware.domain.model.ExpectationOperator;
@@ -67,11 +68,11 @@ class BodyValidatorTest {
 
         Mockito
                 .when(jsonProcessor.extractValue(responseBody, "/name"))
-                .thenReturn("bulbasaur");
+                .thenReturn(new ExtractedValue("bulbasaur", true));
 
         Mockito
                 .when(jsonProcessor.extractValue(responseBody, "/type"))
-                .thenReturn("grass");
+                .thenReturn(new ExtractedValue("grass", true));
 
         Mockito
                 .when(dispatcher.evaluate(
