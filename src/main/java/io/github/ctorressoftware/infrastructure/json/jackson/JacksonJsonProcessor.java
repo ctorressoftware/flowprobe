@@ -7,6 +7,7 @@ import io.github.ctorressoftware.application.exception.JsonDeserializationExcept
 import io.github.ctorressoftware.application.exception.JsonExtractionException;
 import io.github.ctorressoftware.application.exception.JsonSerializationException;
 import io.github.ctorressoftware.application.port.out.JsonProcessor;
+import io.github.ctorressoftware.application.usecase.flowexecution.validation.extraction.ExtractedValue;
 
 public class JacksonJsonProcessor implements JsonProcessor {
 
@@ -34,16 +35,20 @@ public class JacksonJsonProcessor implements JsonProcessor {
     }
 
     @Override
-    public Object extractValue(String data, String valuePath) {
+    public ExtractedValue extractValue(String data, String valuePath) {
         try {
             JsonNode root = objectMapper.readTree(data);
             JsonNode node = root.at(valuePath);
 
             if (node.isMissingNode()) {
-                throw new JsonExtractionException("JSON path does not exist: " + valuePath);
+                // throw new JsonExtractionException("JSON path does not exist: " + valuePath);
+                return new ExtractedValue(null, false);
             }
 
-            return objectMapper.treeToValue(node, Object.class);
+            return new ExtractedValue(
+                objectMapper.treeToValue(node, Object.class),
+                true
+            );
 
         } catch (JsonProcessingException e) {
             throw new JsonExtractionException("Could not extract data from JSON", e);
