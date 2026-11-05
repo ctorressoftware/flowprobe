@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.ctorressoftware.application.exception.JsonDeserializationException;
 import io.github.ctorressoftware.application.exception.JsonExtractionException;
 import io.github.ctorressoftware.application.exception.JsonSerializationException;
+import io.github.ctorressoftware.application.usecase.flowexecution.validation.extraction.ExtractedValue;
 import io.github.ctorressoftware.infrastructure.ticket.azuredevops.AzureDevOpsConfig;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -77,10 +78,10 @@ class JacksonJsonProcessorTest {
             }
             """;
 
-        Assertions.assertEquals("Pikachu", jsonProcessor.extractValue(json, "/name"));
-        Assertions.assertEquals(25, jsonProcessor.extractValue(json, "/level"));
-        Assertions.assertEquals(true, jsonProcessor.extractValue(json, "/enabled"));
-        Assertions.assertNull(jsonProcessor.extractValue(json, "/nullable"));
+        Assertions.assertEquals("Pikachu", jsonProcessor.extractValue(json, "/name").value());
+        Assertions.assertEquals(25, jsonProcessor.extractValue(json, "/level").value());
+        Assertions.assertEquals(true, jsonProcessor.extractValue(json, "/enabled").value());
+        Assertions.assertNull(jsonProcessor.extractValue(json, "/nullable").value());
     }
 
     @Test
@@ -222,7 +223,7 @@ class JacksonJsonProcessorTest {
     }
 
     @Test
-    void shouldThrowJsonExtractionExceptionIfJsonNodeIsMissing() {
+    void shouldReturnNotFoundExtractedValueIfJsonNodeIsMissing() {
 
         objectMapper = new ObjectMapper();
         jsonProcessor = new JacksonJsonProcessor(objectMapper);
@@ -237,14 +238,11 @@ class JacksonJsonProcessorTest {
 
         String missingPath = "/user/email";
 
-        JsonExtractionException exception = Assertions.assertThrows(
-                JsonExtractionException.class,
-                () -> jsonProcessor.extractValue(json, missingPath)
-        );
+        ExtractedValue extracted = jsonProcessor.extractValue(json, missingPath);
 
         Assertions.assertEquals(
-                "JSON path does not exist: " + missingPath,
-                exception.getMessage()
+                new ExtractedValue(null, false),
+                extracted
         );
     }
 }
