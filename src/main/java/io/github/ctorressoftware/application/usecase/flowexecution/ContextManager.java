@@ -1,6 +1,7 @@
 package io.github.ctorressoftware.application.usecase.flowexecution;
 
 import io.github.ctorressoftware.application.port.out.JsonProcessor;
+import io.github.ctorressoftware.application.usecase.flowexecution.validation.extraction.ExtractedValue;
 import io.github.ctorressoftware.domain.model.Context;
 import io.github.ctorressoftware.domain.model.ContextVariable;
 
@@ -24,9 +25,10 @@ public class ContextManager {
             return;
         }
 
-        toExport.forEach((key, value) ->
-                context.putVariable(key, jsonProcessor.extractValue(data, value))
-        );
+        toExport.forEach((key, value) -> {
+            ExtractedValue extracted = jsonProcessor.extractValue(data, value);
+            context.putVariable(key, extracted.value());
+        });
     }
 
     public List<ContextVariable> getVariables() {
