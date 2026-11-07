@@ -38,7 +38,7 @@ dependencies {
     annotationProcessor("info.picocli:picocli-codegen:4.7.7")
     implementation("org.yaml:snakeyaml:2.6")
     implementation("com.github.javakeyring:java-keyring:1.0.4")
-    implementation(platform("com.fasterxml.jackson:jackson-bom:2.22.2"))
+    implementation(platform("com.fasterxml.jackson:jackson-bom:2.22.4"))
     implementation("com.fasterxml.jackson.core:jackson-databind")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
     testImplementation("org.mockito:mockito-core:5.23.0")
