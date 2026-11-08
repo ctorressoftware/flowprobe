@@ -3,6 +3,7 @@ package io.github.ctorressoftware.application.usecase.flowexecution.validation;
 import io.github.ctorressoftware.application.port.out.JsonProcessor;
 import io.github.ctorressoftware.application.usecase.flowexecution.validation.evaluator.registry.BinaryEvaluationInput;
 import io.github.ctorressoftware.application.usecase.flowexecution.validation.extraction.ExtractedValue;
+import io.github.ctorressoftware.domain.exception.InvalidExpectationException;
 import io.github.ctorressoftware.domain.model.ExpectationResult;
 import io.github.ctorressoftware.domain.model.BodyExpectation;
 import io.github.ctorressoftware.domain.model.ExpectationOperator;
@@ -133,6 +134,78 @@ class BodyValidatorTest {
         Mockito.verifyNoInteractions(
                 jsonProcessor,
                 dispatcher
+        );
+    }
+
+    @Test
+    void shouldThrowInvalidExpectationExceptionWhenBodyExpectationPathIsNull() {
+
+        InvalidExpectationException exception = Assertions.assertThrows(
+                InvalidExpectationException.class,
+                () -> new BodyExpectation(
+                        null,
+                        ExpectationOperator.EQUALS,
+                        "exception"
+                )
+        );
+
+        Assertions.assertEquals(
+                "Expectation path cannot be blank",
+                exception.getMessage()
+        );
+    }
+
+    @Test
+    void shouldThrowInvalidExpectationExceptionWhenBodyExpectationOperatorIsNull() {
+
+        InvalidExpectationException exception = Assertions.assertThrows(
+                InvalidExpectationException.class,
+                () -> new BodyExpectation(
+                        "/wrong",
+                        null,
+                        ""
+                )
+        );
+
+        Assertions.assertEquals(
+                "Expectation operator cannot be null",
+                exception.getMessage()
+        );
+    }
+
+    @Test
+    void shouldThrowInvalidExpectationExceptionWhenBodyExpectationExpectedValueIsNullWithBinaryOperator() {
+
+        InvalidExpectationException exception = Assertions.assertThrows(
+                InvalidExpectationException.class,
+                () -> new BodyExpectation(
+                        "/binary-operator",
+                        ExpectationOperator.EQUALS,
+                        null
+                )
+        );
+
+        Assertions.assertEquals(
+                "Operator 'EQUALS' requires a value",
+                exception.getMessage()
+        );
+    }
+
+    @Test
+    void shouldThrowInvalidExpectationExceptionWhenHasExpectedValueWithUnaryOperator() {
+
+        InvalidExpectationException exception = Assertions.assertThrows(
+                InvalidExpectationException.class,
+                () -> new BodyExpectation(
+                        "/unary-operator",
+                        ExpectationOperator.EXISTS,
+                        "A value"
+                )
+        );
+
+        Assertions.assertEquals(
+                "Operator 'EXISTS' does not accept a value",
+                exception.getMessage()
         );
     }
 }
