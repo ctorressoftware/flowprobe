@@ -276,21 +276,17 @@ class FlowProbeE2ETest {
 
         String yaml = """
                 name: "e2e-failure"
-
                 steps:
                   - name: "failing-step"
                     request:
                       url: "http://localhost:%d/failure"
                       method: "GET"
-
                     expect:
                       status: 200
-
                   - name: "must-not-run"
                     request:
                       url: "http://localhost:%d/should-not-run"
                       method: "GET"
-
                     expect:
                       status: 200
                 """.formatted(port, port);
@@ -299,10 +295,9 @@ class FlowProbeE2ETest {
 
         Assertions.assertFalse(summary.successfulExecution());
         Assertions.assertEquals(1, summary.stepsResults().size());
-        Assertions.assertFalse(
-                summary.stepsResults()
-                        .getFirst()
-                        .successful()
+        Assertions.assertFalse(summary.stepsResults()
+                .getFirst()
+                .successful()
         );
 
         Assertions.assertEquals(0, secondEndpointCalls.get());
