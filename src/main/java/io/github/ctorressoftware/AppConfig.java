@@ -61,7 +61,8 @@ public final class AppConfig {
             new EqualsExpectationEvaluator(),
             new NotEqualsExpectationEvaluator(),
             new ContainsExpectationEvaluator(),
-            new ExistsExpectationEvaluator()
+            new ExistsExpectationEvaluator(),
+            new NotExistsExpectationEvaluator()
     ));
     private final HttpClient httpClient = HttpClient.newBuilder()
             .connectTimeout(HTTP_CONNECT_TIMEOUT)
