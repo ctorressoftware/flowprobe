@@ -328,11 +328,7 @@ class FlowProbeE2ETest {
         return executeResult.resume();
     }
 
-    private void respond(
-            HttpExchange exchange,
-            int status,
-            String body
-    ) throws IOException {
+    private void respond(HttpExchange exchange, int status, String body) throws IOException {
 
         byte[] bytes = body.getBytes(StandardCharsets.UTF_8);
         exchange.getResponseHeaders().set("Content-Type", "application/json");
