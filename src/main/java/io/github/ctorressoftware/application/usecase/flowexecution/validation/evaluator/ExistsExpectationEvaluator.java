@@ -2,6 +2,7 @@ package io.github.ctorressoftware.application.usecase.flowexecution.validation.e
 
 import io.github.ctorressoftware.application.usecase.flowexecution.validation.evaluator.registry.ExpectationEvaluator;
 import io.github.ctorressoftware.application.usecase.flowexecution.validation.evaluator.registry.UnaryEvaluationInput;
+import io.github.ctorressoftware.application.usecase.flowexecution.validation.extraction.ExtractedValue;
 import io.github.ctorressoftware.domain.model.ExpectationOperator;
 import io.github.ctorressoftware.domain.model.ExpectationResult;
 
@@ -20,12 +21,12 @@ public class ExistsExpectationEvaluator
 
     @Override
     public ExpectationResult evaluate(UnaryEvaluationInput input) {
-        Object actual = input.actual();
+        ExtractedValue actual = input.actual();
 
         return new ExpectationResult(
-                actual != null,
+                actual.found(),
                 true,
-                actual
+                actual.value()
         );
     }
 }

@@ -1,6 +1,7 @@
 package io.github.ctorressoftware.application.usecase.flowexecution.validation.evaluator;
 
 import io.github.ctorressoftware.application.usecase.flowexecution.validation.evaluator.registry.UnaryEvaluationInput;
+import io.github.ctorressoftware.application.usecase.flowexecution.validation.extraction.ExtractedValue;
 import io.github.ctorressoftware.domain.model.ExpectationResult;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,7 +19,9 @@ class ExistsExpectationEvaluatorTest {
     @Test
     void shouldReturnTrueIfValueExistsInJsonObject() {
 
-        UnaryEvaluationInput input = new UnaryEvaluationInput(230);
+        UnaryEvaluationInput input = new UnaryEvaluationInput(
+                new ExtractedValue(230, true)
+        );
 
         ExpectationResult result = evaluator.evaluate(input);
 
@@ -29,7 +32,9 @@ class ExistsExpectationEvaluatorTest {
     @Test
     void shouldReturnFalseIfValueNotExistsInJsonObject() {
 
-        UnaryEvaluationInput input = new UnaryEvaluationInput(null);
+        UnaryEvaluationInput input = new UnaryEvaluationInput(
+                new ExtractedValue(null, false)
+        );
 
         ExpectationResult result = evaluator.evaluate(input);
 
