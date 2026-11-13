@@ -1,6 +1,7 @@
 package io.github.ctorressoftware.application.usecase.flowexecution.validation.evaluator;
 
 import io.github.ctorressoftware.application.usecase.flowexecution.validation.evaluator.registry.BinaryEvaluationInput;
+import io.github.ctorressoftware.application.usecase.flowexecution.validation.extraction.ExtractedValue;
 import io.github.ctorressoftware.domain.model.ExpectationResult;
 import io.github.ctorressoftware.domain.model.ExpectationOperator;
 import org.junit.jupiter.api.Assertions;
@@ -25,7 +26,7 @@ class NotEqualsExpectationEvaluatorTest {
     void shouldReturnSuccessfulResultWhenValuesAreDifferent() {
 
         ExpectationResult result = evaluator.evaluate(new BinaryEvaluationInput(
-                "pikachu",
+                new ExtractedValue("pikachu", true),
                 "bulbasaur"
         ));
 
@@ -38,7 +39,7 @@ class NotEqualsExpectationEvaluatorTest {
     void shouldReturnFailedResultWhenValuesAreEqual() {
 
         ExpectationResult result = evaluator.evaluate(new BinaryEvaluationInput(
-                "bulbasaur",
+                new ExtractedValue("bulbasaur", true),
                 "bulbasaur"
         ));
 
@@ -51,7 +52,10 @@ class NotEqualsExpectationEvaluatorTest {
     void shouldReturnFailedResultWhenBothValuesAreNull() {
 
         ExpectationResult result = evaluator.evaluate(
-                new BinaryEvaluationInput(null, null)
+                new BinaryEvaluationInput(
+                        new ExtractedValue(null, false),
+                        null
+                )
         );
 
         Assertions.assertFalse(result.successful());
@@ -60,10 +64,28 @@ class NotEqualsExpectationEvaluatorTest {
     }
 
     @Test
-    void shouldReturnSuccessfulResultWhenOnlyActualValueIsNull() {
+    void shouldReturnFailedResultWhenActualPathIsMissing() {
 
         ExpectationResult result = evaluator.evaluate(
-                new BinaryEvaluationInput(null, "bulbasaur")
+                new BinaryEvaluationInput(
+                        new ExtractedValue(null, false),
+                        "bulbasaur"
+                )
+        );
+
+        Assertions.assertFalse(result.successful());
+        Assertions.assertEquals("bulbasaur", result.expected());
+        Assertions.assertNull(result.actual());
+    }
+
+    @Test
+    void shouldReturnSuccessfulResultWhenPresentActualValueIsNull() {
+
+        ExpectationResult result = evaluator.evaluate(
+                new BinaryEvaluationInput(
+                        new ExtractedValue(null, true),
+                        "bulbasaur"
+                )
         );
 
         Assertions.assertTrue(result.successful());
@@ -75,7 +97,10 @@ class NotEqualsExpectationEvaluatorTest {
     void shouldReturnSuccessfulResultWhenOnlyExpectedValueIsNull() {
 
         ExpectationResult result = evaluator.evaluate(
-                new BinaryEvaluationInput("bulbasaur", null)
+                new BinaryEvaluationInput(
+                        new ExtractedValue("bulbasaur", true),
+                        null
+                )
         );
 
         Assertions.assertTrue(result.successful());

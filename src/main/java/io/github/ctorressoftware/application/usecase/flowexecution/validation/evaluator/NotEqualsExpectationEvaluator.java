@@ -23,12 +23,13 @@ public class NotEqualsExpectationEvaluator
     @Override
     public ExpectationResult evaluate(BinaryEvaluationInput input) {
 
-        boolean successful = !Objects.equals(input.actual(), input.expected());
+        boolean successful = input.actual().found()
+                && !Objects.equals(input.actual().value(), input.expected());
 
         return new ExpectationResult(
                 successful,
                 input.expected(),
-                input.actual()
+                input.actual().value()
         );
     }
 }
