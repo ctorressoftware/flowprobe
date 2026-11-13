@@ -23,13 +23,13 @@ public class ContainsExpectationEvaluator
 
         boolean successful =
                 input.expected() instanceof String sentenceStr
-                        && input.actual() instanceof String subStringStr
+                        && input.actual().value() instanceof String subStringStr
                         && subStringStr.contains(sentenceStr);
 
         return new ExpectationResult(
                 successful,
                 input.expected(),
-                input.actual()
+                input.actual().value()
         );
     }
 }
