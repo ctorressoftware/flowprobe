@@ -1,6 +1,7 @@
 package io.github.ctorressoftware.application.usecase.flowexecution.validation;
 
 import io.github.ctorressoftware.application.usecase.flowexecution.validation.evaluator.registry.BinaryEvaluationInput;
+import io.github.ctorressoftware.application.usecase.flowexecution.validation.extraction.ExtractedValue;
 import io.github.ctorressoftware.domain.model.ExpectationResult;
 import io.github.ctorressoftware.domain.constant.HttpStatusCode;
 import io.github.ctorressoftware.domain.model.ExpectationOperator;
@@ -37,7 +38,7 @@ class StatusValidatorTest {
         );
 
         BinaryEvaluationInput input = new BinaryEvaluationInput(
-                actualStatus,
+                new ExtractedValue(actualStatus, true),
                 expectedStatus
         );
 
