@@ -39,8 +39,8 @@ public final class BodyValidator {
         );
 
         EvaluationInput input = operator.requiresValue()
-                ? new BinaryEvaluationInput(extracted.value(), expectation.expectedValue())
-                : new UnaryEvaluationInput(extracted.value());
+                ? new BinaryEvaluationInput(extracted, expectation.expectedValue())
+                : new UnaryEvaluationInput(extracted);
 
         return dispatcher.evaluate(operator, input);
     }

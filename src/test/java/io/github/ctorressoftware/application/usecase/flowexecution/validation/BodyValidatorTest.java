@@ -78,14 +78,20 @@ class BodyValidatorTest {
         Mockito
                 .when(dispatcher.evaluate(
                         ExpectationOperator.EQUALS,
-                        new BinaryEvaluationInput("bulbasaur", "bulbasaur")
+                        new BinaryEvaluationInput(
+                                new ExtractedValue("bulbasaur", true),
+                                "bulbasaur"
+                        )
                 ))
                 .thenReturn(nameResult);
 
         Mockito
                 .when(dispatcher.evaluate(
                         ExpectationOperator.NOT_EQUALS,
-                        new BinaryEvaluationInput("grass", "fire")
+                        new BinaryEvaluationInput(new ExtractedValue(
+                                "grass", true),
+                                "fire"
+                        )
                 ))
                 .thenReturn(typeResult);
 
@@ -107,12 +113,18 @@ class BodyValidatorTest {
 
         Mockito.verify(dispatcher).evaluate(
                 ExpectationOperator.EQUALS,
-                new BinaryEvaluationInput("bulbasaur", "bulbasaur")
+                new BinaryEvaluationInput(
+                        new ExtractedValue("bulbasaur", true),
+                        "bulbasaur"
+                )
         );
 
         Mockito.verify(dispatcher).evaluate(
                 ExpectationOperator.NOT_EQUALS,
-                new BinaryEvaluationInput("grass", "fire")
+                new BinaryEvaluationInput(
+                        new ExtractedValue("grass", true),
+                        "fire"
+                )
         );
 
         Mockito.verifyNoMoreInteractions(
