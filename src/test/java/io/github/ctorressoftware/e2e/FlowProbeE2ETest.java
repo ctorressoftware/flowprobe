@@ -19,10 +19,8 @@ import io.github.ctorressoftware.application.usecase.flowexecution.ContextManage
 import io.github.ctorressoftware.application.usecase.flowexecution.FlowExecutor;
 import io.github.ctorressoftware.application.usecase.flowexecution.PlaceholderResolver;
 import io.github.ctorressoftware.application.usecase.flowexecution.validation.*;
-import io.github.ctorressoftware.application.usecase.flowexecution.validation.evaluator.ContainsExpectationEvaluator;
-import io.github.ctorressoftware.application.usecase.flowexecution.validation.evaluator.EqualsExpectationEvaluator;
+import io.github.ctorressoftware.application.usecase.flowexecution.validation.evaluator.*;
 import io.github.ctorressoftware.application.usecase.flowexecution.validation.evaluator.registry.ExpectationEvaluatorRegistry;
-import io.github.ctorressoftware.application.usecase.flowexecution.validation.evaluator.NotEqualsExpectationEvaluator;
 import io.github.ctorressoftware.domain.model.Context;
 import io.github.ctorressoftware.domain.model.FilePath;
 import io.github.ctorressoftware.domain.model.FlowExecutionSummary;
@@ -101,7 +99,9 @@ class FlowProbeE2ETest {
         ExpectationEvaluatorRegistry registry = new ExpectationEvaluatorRegistry(List.of(
                 new EqualsExpectationEvaluator(),
                 new NotEqualsExpectationEvaluator(),
-                new ContainsExpectationEvaluator()
+                new ContainsExpectationEvaluator(),
+                new ExistsExpectationEvaluator(),
+                new NotExistsExpectationEvaluator()
         ));
 
         ExpectationEvaluationDispatcher dispatcher = new ExpectationEvaluationDispatcher(registry);
