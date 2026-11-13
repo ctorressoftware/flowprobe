@@ -81,7 +81,10 @@ class JacksonJsonProcessorTest {
         Assertions.assertEquals("Pikachu", jsonProcessor.extractValue(json, "/name").value());
         Assertions.assertEquals(25, jsonProcessor.extractValue(json, "/level").value());
         Assertions.assertEquals(true, jsonProcessor.extractValue(json, "/enabled").value());
-        Assertions.assertNull(jsonProcessor.extractValue(json, "/nullable").value());
+        Assertions.assertEquals(
+                new ExtractedValue(null, true),
+                jsonProcessor.extractValue(json, "/nullable")
+        );
     }
 
     @Test

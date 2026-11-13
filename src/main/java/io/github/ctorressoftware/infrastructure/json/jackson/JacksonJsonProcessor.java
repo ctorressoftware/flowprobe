@@ -36,12 +36,17 @@ public class JacksonJsonProcessor implements JsonProcessor {
 
     @Override
     public ExtractedValue extractValue(String data, String valuePath) {
+
         try {
             JsonNode root = objectMapper.readTree(data);
+
+            if (root == null) {
+                throw new JsonExtractionException("Cannot extract value from an empty JSON document");
+            }
+
             JsonNode node = root.at(valuePath);
 
             if (node.isMissingNode()) {
-                // throw new JsonExtractionException("JSON path does not exist: " + valuePath);
                 return new ExtractedValue(null, false);
             }
 
