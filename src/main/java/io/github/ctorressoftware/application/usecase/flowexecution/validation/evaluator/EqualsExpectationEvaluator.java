@@ -2,6 +2,7 @@ package io.github.ctorressoftware.application.usecase.flowexecution.validation.e
 
 import io.github.ctorressoftware.application.usecase.flowexecution.validation.evaluator.registry.BinaryEvaluationInput;
 import io.github.ctorressoftware.application.usecase.flowexecution.validation.evaluator.registry.ExpectationEvaluator;
+import io.github.ctorressoftware.application.usecase.flowexecution.validation.extraction.ExtractedValue;
 import io.github.ctorressoftware.domain.model.ExpectationResult;
 import io.github.ctorressoftware.domain.model.ExpectationOperator;
 
@@ -22,13 +23,13 @@ public class EqualsExpectationEvaluator
 
     @Override
     public ExpectationResult evaluate(BinaryEvaluationInput input) {
-        Object actual = input.actual();
+        ExtractedValue actual = input.actual();
         Object expected = input.expected();
 
         return new ExpectationResult(
-                Objects.equals(actual, expected),
+                actual.found() && Objects.equals(actual.value(), expected),
                 expected,
-                actual
+                actual.value()
         );
     }
 }
