@@ -1,6 +1,7 @@
 package io.github.ctorressoftware.application.usecase.flowexecution;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.github.ctorressoftware.application.exception.JsonExtractionException;
 import io.github.ctorressoftware.application.port.out.JsonProcessor;
 import io.github.ctorressoftware.domain.exception.DuplicateVariableException;
 import io.github.ctorressoftware.domain.model.Context;
@@ -148,6 +149,54 @@ class ContextManagerTest {
         Assertions.assertEquals(
                 "Variable name cannot be blank",
                 exception.getMessage()
+        );
+    }
+
+    @Test
+    void shouldRejectExportWhenJsonPathIsMissing() {
+
+        String json = """
+            {
+              "user": {
+                "name": "John"
+              }
+            }
+            """;
+
+        JsonExtractionException exception = Assertions.assertThrows(
+                JsonExtractionException.class,
+                () -> contextManager.exportVariables(
+                        json,
+                        Map.of("email", "/user/email")
+                )
+        );
+
+        Assertions.assertTrue(
+                exception.getMessage().contains("/user/email")
+        );
+
+        Assertions.assertTrue(
+                contextManager.getVariables().isEmpty()
+        );
+    }
+
+    @Test
+    void shouldExportExplicitNullWhenJsonPathExists() {
+
+        String json = """
+            {
+              "nullable": null
+            }
+            """;
+
+        contextManager.exportVariables(
+                json,
+                Map.of("value", "/nullable")
+        );
+
+        Assertions.assertEquals(
+                List.of(new ContextVariable("value", null)),
+                contextManager.getVariables()
         );
     }
 }

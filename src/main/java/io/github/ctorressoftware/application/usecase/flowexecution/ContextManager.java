@@ -1,5 +1,6 @@
 package io.github.ctorressoftware.application.usecase.flowexecution;
 
+import io.github.ctorressoftware.application.exception.JsonExtractionException;
 import io.github.ctorressoftware.application.port.out.JsonProcessor;
 import io.github.ctorressoftware.application.usecase.flowexecution.validation.extraction.ExtractedValue;
 import io.github.ctorressoftware.domain.model.Context;
@@ -27,6 +28,14 @@ public class ContextManager {
 
         toExport.forEach((key, value) -> {
             ExtractedValue extracted = jsonProcessor.extractValue(data, value);
+
+            if (!extracted.found()) {
+                throw new JsonExtractionException(
+                        "Cannot export variable '%s': JSON path '%s' does not exist"
+                                .formatted(key, value)
+                );
+            }
+
             context.putVariable(key, extracted.value());
         });
     }
