@@ -4,6 +4,27 @@ All notable changes to FlowProbe are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project follows semantic versioning conventions for its release identifiers.
 
+## [0.1.1] - 2026-11-15
+
+FlowProbe `0.1.1` expands JSON response validation with presence operators and improves how missing JSON paths and explicit `null` values are handled.
+
+### Added
+
+- Added `exists` and `notExists` body expectation operators. Neither requires a `value` field.
+- Added explicit JSON extraction metadata to distinguish a missing JSON Pointer path from an existing path whose value is `null`.
+
+### Changed
+
+- Refactored expectation evaluation to use typed unary and binary inputs, with a shared evaluator registry and dispatcher.
+- Propagated JSON extraction results through body validation so evaluators can inspect whether an actual value was found.
+- Allowed `null` values to pass through generic placeholder resolution, including expectations without a comparison value.
+
+### Fixed
+
+- Prevented `equals` and `notEquals` body expectations from succeeding when the actual JSON path does not exist.
+- Rejected exports from missing JSON paths instead of silently storing `null`.
+- Handled empty JSON documents explicitly during extraction.
+
 ## [0.1.0] - 2026-10-18
 
 First stable release of FlowProbe.
