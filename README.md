@@ -10,7 +10,7 @@ A flow can call an endpoint, validate its response, export values from the JSON 
 
 It stops on the first failed step, renders a reproducible cURL command, and can optionally create an Azure DevOps work item with the failure context.
 
-> **Project status:** `v0.1.0` is the first stable release of FlowProbe.
+> **Project status:** The source version is `0.1.1`. See [GitHub Releases](https://github.com/ctorressoftware/flowprobe/releases) for published binaries.
 
 ---
 
@@ -44,7 +44,7 @@ Because the flow lives in YAML, the same verification can be reviewed in source 
 - Ordered multi-step HTTP flows defined in YAML.
 - Exact status expectations and default `2xx` success behavior.
 - JSON body expectations using JSON Pointer paths.
-- `equals`, `notEquals`, and `contains` expectation operators.
+- `equals`, `notEquals`, `contains`, `exists`, and `notExists` expectation operators.
 - Typed JSON exports reused through `${placeholders}`.
 - Placeholder resolution in URLs, HTTP methods, headers, object keys, request bodies, lists, and response expectation values.
 - Type preservation for exact placeholders.
@@ -144,6 +144,19 @@ steps:
           operator: "equals"
           value: "pikachu"
 ```
+
+Presence checks do not need a `value` field:
+
+```yaml
+expect:
+  body:
+    - path: "/profile/name"
+      operator: "exists"
+    - path: "/profile/legacyId"
+      operator: "notExists"
+```
+
+`exists` checks whether the JSON path exists, even if its value is `null`. `notExists` checks that the path is absent.
 
 Run it:
 
