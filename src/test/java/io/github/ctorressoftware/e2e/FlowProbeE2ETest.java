@@ -303,6 +303,92 @@ class FlowProbeE2ETest {
         Assertions.assertEquals(0, secondEndpointCalls.get());
     }
 
+    @Test
+    void shouldPassPresenceExpectationsForPresentNullAndMissingPath() throws Exception {
+
+        server.createContext("/presence", exchange -> respond(
+                exchange,
+                200,
+                """
+                {
+                  "nullable": null,
+                  "name": "Bulbasaur"
+                }
+                """
+        ));
+
+        server.start();
+        int port = server.getAddress().getPort();
+
+        String yaml = """
+                name: presence-success
+                steps:
+                  - name: check-presence
+                    request:
+                      url: "http://localhost:%d/presence"
+                      method: GET
+                    expect:
+                      status: 200
+                      body:
+                        - path: "/nullable"
+                          operator: "exists"
+                        - path: "/missing"
+                          operator: "notExists"
+                """.formatted(port);
+
+        FlowExecutionSummary summary = execute(yaml);
+
+        Assertions.assertTrue(summary.successfulExecution());
+        Assertions.assertEquals(1, summary.stepsResults().size());
+        var expectations = summary.stepsResults().getFirst().validationResult().results();
+        Assertions.assertEquals(3, expectations.size());
+        Assertions.assertTrue(expectations.stream().allMatch(result -> result.successful()));
+    }
+
+    @Test
+    void shouldFailPresenceExpectationsWhenPathsDoNotMatch() throws Exception {
+
+        server.createContext("/presence", exchange -> respond(
+                exchange,
+                200,
+                """
+                {
+                  "nullable": null,
+                  "name": "Bulbasaur"
+                }
+                """
+        ));
+
+        server.start();
+        int port = server.getAddress().getPort();
+
+        String yaml = """
+                name: presence-failure
+                steps:
+                  - name: check-presence
+                    request:
+                      url: "http://localhost:%d/presence"
+                      method: GET
+                    expect:
+                      status: 200
+                      body:
+                        - path: "/nullable"
+                          operator: "notExists"
+                        - path: "/missing"
+                          operator: "exists"
+                """.formatted(port);
+
+        FlowExecutionSummary summary = execute(yaml);
+
+        Assertions.assertFalse(summary.successfulExecution());
+        Assertions.assertEquals(1, summary.stepsResults().size());
+        var expectations = summary.stepsResults().getFirst().validationResult().results();
+        Assertions.assertEquals(3, expectations.size());
+        Assertions.assertTrue(expectations.getFirst().successful()); // HTTP 200
+        Assertions.assertFalse(expectations.get(1).successful()); // Present null is not absent
+        Assertions.assertFalse(expectations.get(2).successful()); // Missing path does not exist
+    }
+
     private FlowExecutionSummary execute(String yaml) throws IOException {
 
         Path file = tempDir.resolve("flow.yaml");
