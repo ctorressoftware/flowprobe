@@ -83,7 +83,7 @@ flowprobe --version
 Current stable version:
 
 ```text
-flowprobe 0.1.0
+flowprobe 0.1.1
 ```
 
 ### Build from source
