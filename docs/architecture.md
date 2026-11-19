@@ -73,6 +73,20 @@ The application layer also contains flow execution behavior such as:
 - response validation;
 - expectation evaluator selection.
 
+### Response validation and JSON extraction
+
+The `JsonProcessor` outbound port exposes `extractValue(json, path)`, which returns an `ExtractedValue(value, found)` record. This distinguishes a missing JSON Pointer path (`found = false`) from an existing path whose value is JSON `null` (`found = true`, `value = null`). The Jackson adapter implements this behavior.
+
+`BodyValidator` wraps extraction results in `UnaryEvaluationInput` or `BinaryEvaluationInput`, according to whether the selected operator requires a comparison value. `StatusValidator` constructs a binary input containing an explicitly present HTTP status. Both validators delegate evaluation to `ExpectationEvaluationDispatcher`.
+
+`ExpectationEvaluatorRegistry` is responsible for locating evaluators by `ExpectationOperator`; the dispatcher checks input compatibility using each evaluator's `inputType()` and then calls `evaluate(...)`. Evaluators define the actual comparison semantics:
+
+- `exists` and `notExists` inspect `found` rather than only checking for `null`.
+- `equals` and `notEquals` require the actual path to be present before comparing values.
+- `contains` checks whether the actual string includes the expected substring.
+
+`ContextManager` uses the same extraction result but treats a missing export path as an error. These choices keep extraction mechanics separate from validation and export policies.
+
 ## Infrastructure
 
 Infrastructure contains adapters for external technologies and user interfaces.
@@ -109,11 +123,11 @@ infrastructure/callservice
 
 ### JSON
 
-Jackson is behind the application `JsonProcessor` port.
+Jackson is behind the application `JsonProcessor` port. The adapter returns extraction results with explicit presence metadata and rejects empty or malformed JSON documents.
 
 ### Persistence
 
-Provider configuration is stored through a repository adapter backed by the operating-system keystore integration.
+Provider configuration currently uses the operating-system keystore integration. A secure file-backed fallback is planned, but is not an available storage backend in `0.1.1`.
 
 ### Ticketing
 

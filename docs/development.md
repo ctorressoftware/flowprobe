@@ -183,8 +183,8 @@ Release tags must use the same version prefixed with `v`.
 For example:
 
 ```text
-Gradle version: 0.1.0
-Git tag:        v0.1.0
+Gradle version: 0.1.1
+Git tag:        v0.1.1
 ```
 
 Pre-release versions follow the same rule:
@@ -223,7 +223,7 @@ The workflow then:
 
 Versions containing a pre-release suffix, such as `0.2.0-rc.1`, are published as GitHub pre-releases.
 
-Stable versions, such as `0.1.0`, are published as regular GitHub releases.
+Stable versions, such as `0.1.1`, are published as regular GitHub releases.
 
 ## Release preparation checklist
 
@@ -232,6 +232,7 @@ Before pushing a release tag, verify that:
 - The version in `build.gradle.kts` matches the intended release.
 - `CHANGELOG.md` contains an entry for that exact version.
 - `README.md` and the relevant documentation reflect the release's features and limitations.
+- New or changed expectation operators have unit and end-to-end coverage, including missing paths and explicit JSON `null` values.
 - The release changes have been committed.
 - The repository references the canonical FlowProbe repository.
 
@@ -286,7 +287,7 @@ https://github.com/ctorressoftware/flowprobe.git
 Set the version being released:
 
 ```bash
-VERSION="0.1.0"
+VERSION="0.1.1"
 ```
 
 Create and push an annotated tag:
@@ -296,10 +297,10 @@ git tag -a "v${VERSION}" -m "FlowProbe v${VERSION}"
 git push origin "v${VERSION}"
 ```
 
-For the first stable release, this creates:
+For the `0.1.1` release, this creates:
 
 ```text
-v0.1.0
+v0.1.1
 ```
 
 Pushing the tag triggers the release workflow.
@@ -332,10 +333,10 @@ brew reinstall ctorressoftware/tap/flowprobe
 
 Verify that the installed executable reports the expected version.
 
-For a stable release such as `v0.1.0`, the expected output is:
+For a stable release such as `v0.1.1`, the expected output is:
 
 ```text
-flowprobe 0.1.0
+flowprobe 0.1.1
 ```
 
 ## Release references

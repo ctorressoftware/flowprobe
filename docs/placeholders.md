@@ -135,9 +135,31 @@ expect:
       value: "pokemon-${pokemonName}"
 ```
 
+## Null values and path presence
+
+`JsonProcessor` distinguishes a JSON Pointer path that exists with a `null` value from a path that does not exist. An existing JSON `null` value can be exported; attempting to export a missing path fails rather than silently creating a `null` variable.
+
+When an exported variable with a `null` value occupies an entire **structured** value, such as a JSON body property, the resolved value remains `null`:
+
+```yaml
+body:
+  deletedAt: "${deletedAt}"
+```
+
+When the variable is interpolated into text, the resolver converts it to the literal string `"null"`:
+
+```yaml
+body:
+  message: "deletedAt=${deletedAt}"
+```
+
+URLs and HTTP header values are resolved textually, even when a placeholder occupies the entire field. Avoid using `null` exports for required request fields.
+
+Unary response expectations such as `exists` and `notExists` do not need a `value` field. They inspect JSON path presence, not the value of a placeholder.
+
 ## Missing variables
 
-A placeholder must refer to a variable already present in the flow context.
+A placeholder must refer to a variable already present in the flow context. Environment variables are **not yet supported** as placeholder sources in `0.1.1`; syntax such as `${env:API_TOKEN}` is planned, not available.
 
 Using an undefined variable causes execution to fail with a missing-variable error. FlowProbe does not silently leave unresolved placeholders in place.
 

@@ -91,11 +91,13 @@ expect:
 
 Currently supported operators:
 
-```text
-equals
-notEquals
-contains
-```
+| Operator    | `value` required | Behavior                                                                            |
+|-------------|:----------------:|-------------------------------------------------------------------------------------|
+| `equals`    |       Yes        | Actual and expected values must be equal, and the JSON path must exist.             |
+| `notEquals` |       Yes        | Actual and expected values must differ, and the JSON path must exist.               |
+| `contains`  |       Yes        | Case-sensitive substring check: the actual string must contain the expected string. |
+| `exists`    |        No        | The JSON Pointer path must exist, including when its value is `null`.               |
+| `notExists` |        No        | The JSON Pointer path must be absent. An existing `null` value is **not** absent.   |
 
 Multiple expectations can be declared:
 
@@ -119,6 +121,27 @@ expect:
 The `contains` operator performs case-sensitive substring matching and requires both values to be strings.
 
 FlowProbe extracts the actual JSON value from each path and evaluates it against the expected value.
+
+### Presence checks
+
+Presence checks omit `value`:
+
+```yaml
+expect:
+  body:
+    - path: "/nullable"
+      operator: "exists"
+    - path: "/missing"
+      operator: "notExists"
+```
+
+For a response such as `{ "nullable": null }`, both expectations pass: `/nullable` exists and `/missing` does not.
+
+FlowProbe distinguishes missing JSON Pointer paths from existing JSON `null` values during extraction.
+
+For `equals` and `notEquals`, a missing actual path causes validation to fail.
+
+An explicit `value: null` in a comparison expectation is not currently supported by the flow model. A separate null-value operator is planned.
 
 ## Exports
 
